@@ -8,7 +8,4 @@ npm-debug.log
 # Nuxt build
 .nuxt
 
-# Nuxt generate
-dist
-
 .env
