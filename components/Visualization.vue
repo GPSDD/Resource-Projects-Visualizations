@@ -1,22 +1,29 @@
 <template>
   <div class="visualization-component">
-    <span>visualization</span>
+    <h1>Resource Watch vs World Bank Visualization</h1>
     <div class="visualization-container">
       <div class="visualization__form-area">
         <h5>Plot variables</h5>
         <div class="input">
-          <input v-model="reportYear" placeholder="Report Year">
+          <label for="reportYear">Year</label> 
+          <input v-model="reportYear" name="reportYear" placeholder="Report Year">
         </div>
         <div class="input">
-          <input v-model="indicators" placeholder="World Bank Indicators">
+          <label for="indicator">World Bank Indicator ID</label> 
+          <input v-model="indicator" name="indicator" placeholder="World Bank Indicators">
         </div>
         <div class="input">
-          <input v-model="xColumnName" placeholder="X-axis column name">
+          <label for="xColumnName">X-Axis Label</label> 
+          <input v-model="xColumnName" name="xColumnName" placeholder="X-axis column name">
         </div>
         <div class="input">
-          <input v-model="yColumnName" placeholder="Y-axis column name">
+          <label for="yColumnName">Y-Axis Label</label> 
+          <input v-model="yColumnName" name="yColumnName" placeholder="Y-axis column name">
         </div>
         <button @click="drawPlot(false)" class="btn">Update Plot</button>
+        <div class="visualization__link-area">
+          <a href="https://data.worldbank.org/indicator/?tab=all" target="__blank" class="visualization__form-area-link">Search for world bank indicators</a>
+        </div>
       </div>
       <div id="visualization__plot-area" ref="plot" class="visualization__plot-area"></div>
     </div>
@@ -31,7 +38,7 @@ export default {
     query += `where%20reportYear%20=%20${this.reportYear}%20group%20by%20country`
     let response = await this.$axios.$get(query);
     this.xAxisData = response.data;
-    worldBankQuery += `${this.indicators}?format=json&per_page=30000&date=${this.reportYear}`;
+    worldBankQuery += `${this.indicator}?format=json&per_page=30000&date=${this.reportYear}`;
     let worldBankResponse = await this.$axios.$get(worldBankQuery);
     this.yAxisData = worldBankResponse[1];
     this.data = this.xAxisData.reduce((result,datapoint) => {
@@ -44,12 +51,16 @@ export default {
       return result;
     }, [])
     this.drawPlot(true)
+    // response = await this.$axios.$get(`http://api.worldbank.org/v2/indicators?format=json`);
+    // this.indicators = response[1];
+
   },
   data(){
     return {
       reportYear: 2016,
       dataSetId: '2021c1039e-8fc6-4aae-8ebb-77c580c63057',
-      indicators: 'NY.GDP.MINR.RT.ZS',
+      indicator: 'NY.GDP.MINR.RT.ZS',
+      // indicators: [],
       data:[],
       xAxisData:[],
       yAxisData:[],
@@ -231,6 +242,11 @@ export default {
   svg {
     width: 100%
   }
+  h1{
+    color: #435198;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
   //form css
   input,select{
     width: 100%;
@@ -271,9 +287,22 @@ export default {
     &__form-area{
       width: 40%;
       padding: 40px;
+      text-align: left;
+      label{
+        font-size: 10px;
+        font-weight: bold;
+      }
     }
     &__plot-area{
       width: 60%;
+    }
+    &__link-area{
+      text-align: left;
+      margin-top: 40px;
+      a{
+        text-decoration: none;
+        color: #435198;
+      }
     }
   }
   //svg css
