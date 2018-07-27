@@ -1,6 +1,6 @@
 <template>
   <div class="visualization-component">
-    <h1>Resource Watch vs World Bank Visualization</h1>
+    <h1>Resource Projects vs World Bank Visualization</h1>
     <div class="visualization-container">
       <div class="visualization__form-area">
         <h5>Plot variables</h5>
