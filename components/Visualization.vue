@@ -1,7 +1,7 @@
 <template>
   <div class="visualization-component">
     <h1>Resource Projects vs World Bank Visualization</h1>
-    <div class="visualization-container">
+    <div class="visualization-container" >
       <div class="visualization__form-area">
         <h5>Plot variables</h5>
         <div class="input">
@@ -25,16 +25,21 @@
           <a href="https://data.worldbank.org/indicator/?tab=all" target="__blank" class="visualization__form-area-link">Search for world bank indicators</a>
         </div>
       </div>
+      <spinner-component :loading="isLoading"></spinner-component>
       <div id="visualization__plot-area" ref="plot" class="visualization__plot-area"></div>
     </div>
   </div>
 </template>
 <script>
 import * as d3 from 'd3';
+import SpinnerComponent from '~/components/Spinner.vue';
+
 let query = `https://api.apihighways.org/v1/query?sql=SELECT%20country,sum(payment)%20FROM%2021c1039e-8fc6-4aae-8ebb-77c580c63057%20`
 let worldBankQuery = `https://api.worldbank.org/v2/countries/all/indicators/`
+
 export default {
   async mounted(){
+    this.isLoading = true;
     query += `where%20reportYear%20=%20${this.reportYear}%20group%20by%20country`
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViNjQ5ZTM2NzNjYWY4MGI4ZmQ0ODQzOSIsInJvbGUiOiJVU0VSIiwicHJvdmlkZXIiOiJsb2NhbCIsImVtYWlsIjoiYWRyaWFuQHRvdGFnby5jbyIsImNyZWF0ZWRBdCI6MTUzNDE4NjYxOTgwNiwiaWF0IjoxNTM0MTg2NjE5fQ._5w_2HJ9jz4d6LImZU96cWKqgiUn4NBcpo1ie9yAUks';
     var config = {
@@ -43,7 +48,7 @@ export default {
     let response = await this.$axios.$get(query, config);
     this.xAxisData = response.data;
     worldBankQuery += `${this.indicator}?format=json&per_page=30000&date=${this.reportYear}`;
-    console.log(config)
+
     let worldBankResponse = await this.$axios.$get(worldBankQuery);
     this.yAxisData = worldBankResponse[1];
     this.data = this.xAxisData.reduce((result,datapoint) => {
@@ -55,6 +60,7 @@ export default {
         console.log(`No datapoint found for ${datapoint.country}`)
       return result;
     }, [])
+    this.isLoading = false;
     this.drawPlot(true)
     // response = await this.$axios.$get(`http://api.worldbank.org/v2/indicators?format=json`);
     // this.indicators = response[1];
@@ -73,9 +79,11 @@ export default {
       xColumnName: 'Resource Payments (in USD)',
       plotWidth: 840,
       plotHeight: 500,
+      isLoading: true,
       svg: null
     }
   },
+  components: {SpinnerComponent},
   methods:{
     drawPlot(initial){
       let margin = {top: 20, right: 20, bottom: 60, left: 20},
