@@ -36,9 +36,14 @@ let worldBankQuery = `https://api.worldbank.org/v2/countries/all/indicators/`
 export default {
   async mounted(){
     query += `where%20reportYear%20=%20${this.reportYear}%20group%20by%20country`
-    let response = await this.$axios.$get(query);
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViNjQ5ZTM2NzNjYWY4MGI4ZmQ0ODQzOSIsInJvbGUiOiJVU0VSIiwicHJvdmlkZXIiOiJsb2NhbCIsImVtYWlsIjoiYWRyaWFuQHRvdGFnby5jbyIsImNyZWF0ZWRBdCI6MTUzNDE4NjYxOTgwNiwiaWF0IjoxNTM0MTg2NjE5fQ._5w_2HJ9jz4d6LImZU96cWKqgiUn4NBcpo1ie9yAUks';
+    var config = {
+      headers: {'Authorization': "Bearer " + token}
+    };
+    let response = await this.$axios.$get(query, config);
     this.xAxisData = response.data;
     worldBankQuery += `${this.indicator}?format=json&per_page=30000&date=${this.reportYear}`;
+    console.log(config)
     let worldBankResponse = await this.$axios.$get(worldBankQuery);
     this.yAxisData = worldBankResponse[1];
     this.data = this.xAxisData.reduce((result,datapoint) => {
