@@ -47,19 +47,9 @@ export default {
     };
     let response = await this.$axios.$get(query, config);
     this.xAxisData = response.data;
-    worldBankQuery += `${this.indicator}?format=json&per_page=30000&date=${this.reportYear}`;
+    
+    await this.getIndicatorData();
 
-    let worldBankResponse = await this.$axios.$get(worldBankQuery);
-    this.yAxisData = worldBankResponse[1];
-    this.data = this.xAxisData.reduce((result,datapoint) => {
-      //find data point
-      let countryDataPoint = this.yAxisData.find(y => y.country.value.toLowerCase() === datapoint.country.toLowerCase())
-      if(countryDataPoint && countryDataPoint.country.value != 'Russian Federation')
-        result.push(Object.assign(datapoint,{'yValue':countryDataPoint.value,'payment':datapoint["SUM(payment)"]}))
-      else
-        console.log(`No datapoint found for ${datapoint.country}`)
-      return result;
-    }, [])
     this.isLoading = false;
     this.drawPlot(true)
     // response = await this.$axios.$get(`http://api.worldbank.org/v2/indicators?format=json`);
@@ -85,7 +75,27 @@ export default {
   },
   components: {SpinnerComponent},
   methods:{
-    drawPlot(initial){
+    async getIndicatorData() {
+      let fullWorldBankQuery = worldBankQuery + `${this.indicator}?format=json&per_page=30000&date=${this.reportYear}`;
+
+      let worldBankResponse = await this.$axios.$get(fullWorldBankQuery);
+      this.yAxisData = worldBankResponse[1];
+    },
+    async drawPlot(initial){
+      if(!initial) {
+        //get new indicator data
+        await this.getIndicatorData();
+      }
+      this.data = this.xAxisData.reduce((result,datapoint) => {
+        //find data point
+        let countryDataPoint = this.yAxisData.find(y => y.country.value.toLowerCase() === datapoint.country.toLowerCase())
+        if(countryDataPoint && countryDataPoint.country.value != 'Russian Federation')
+          result.push(Object.assign(datapoint,{'yValue':countryDataPoint.value,'payment':datapoint["SUM(payment)"]}))
+        else
+          console.log(`No datapoint found for ${datapoint.country}`)
+        return result;
+      }, [])
+
       let margin = {top: 20, right: 20, bottom: 60, left: 20},
         width = this.plotWidth - margin.left - margin.right,
         height = this.plotHeight - margin.top - margin.bottom;
